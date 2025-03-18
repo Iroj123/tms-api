@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'authentication',
 ]
 
-# settings.py
-AUTH_USER_MODEL = 'authentication.CustomUser'
 
 
 REST_FRAMEWORK = {
@@ -144,6 +142,8 @@ DATABASES = {
         'PORT': '5432',  # Default PostgreSQL port
     }
 }
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 
 

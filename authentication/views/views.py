@@ -1,43 +1,47 @@
 # authentication/views.py
 from django.contrib.auth import authenticate
+from knox.models import AuthToken
+from rest_framework import status, permissions
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from knox.models import AuthToken
+
 from authentication.serializers.serializers import UserSerializer
-from django.contrib.auth import get_user_model
-User = get_user_model()
+
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
+        """
+        Handle user registration and Knox authentication token creation.
+        """
         serializer = UserSerializer(data=request.data)
 
         if serializer.is_valid():
-            user = serializer.save()  # Save the user
-            token = AuthToken.objects.create(user)[1]  # Generate Knox token
+            user = serializer.save()
+
+            # Create a Knox token for the new user
+            token = AuthToken.objects.create(user=user)
 
             return Response({
-                'user': serializer.data,
-                'token': token,
+                "message": "User created successfully",
+                "token": token[1],  # The second element is the token string
             }, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
 
-        if username is None or password is None:
+        if email is None or password is None:
             return Response({'error': 'Missing username or password'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
 
         if user is None:
             return Response({'error': 'Invalid username or password'}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,9 +50,9 @@ class LoginView(APIView):
 
         return Response({
             'user': {
-                'username': user.username,
                 'email': user.email,
-                'phone_number': user.phone_number,
+                'first_name':user.first_name,
+                'last_name': user.last_name,
             },
             'token': token,
         }, status=status.HTTP_200_OK)

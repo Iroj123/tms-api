@@ -1,21 +1,41 @@
-# authentication/serializers/serializers.py
+# authentication/serializers.py
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-User = get_user_model()
+
+from authentication.models import CustomUser
+
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    repeat_password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User  # This will automatically use CustomUser
-        fields = ['username', 'email', 'phone_number', 'password']  # Include any extra fields you want
+        model = CustomUser
+        fields = ['email', 'first_name', 'last_name', 'password', 'repeat_password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def validate(self, data):
+        """
+        Check that the password and repeat_password match.
+        """
+        password = data.get('password')
+        repeat_password = data.get('repeat_password')
+
+        if password != repeat_password:
+            raise serializers.ValidationError({"repeat_password": "Passwords must match."})
+
+        return data
 
     def create(self, validated_data):
-        # Hash the password before saving the user
-        user = User.objects.create_user(
-            username=validated_data['username'],
+        """
+        Create and return a new user with encrypted password.
+        """
+        validated_data.pop('repeat_password', None)  # Remove repeat_password from validated data
+        user = CustomUser.objects.create_user(
             email=validated_data['email'],
-            phone_number=validated_data['phone_number'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
             password=validated_data['password']
         )
         return user
