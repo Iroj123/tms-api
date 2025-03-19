@@ -5,14 +5,15 @@ from authentication.models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    repeat_password = serializers.CharField(write_only=True)
+    password = serializers.CharField()
+    repeat_password = serializers.CharField()
 
     class Meta:
         model = CustomUser
         fields = ['email', 'first_name', 'last_name', 'password', 'repeat_password']
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'required': True},
+            'repeat_password': {'required': True},
         }
 
     def validate(self, data):
@@ -39,3 +40,5 @@ class UserSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+
