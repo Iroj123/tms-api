@@ -22,23 +22,25 @@ from django.contrib import admin
 
 
 
-# Create a schema view instance with metadata
+
 schema_view = get_schema_view(
-    openapi.Info(
-        title="Your API Title",
-        default_version='v1',
-        description="A description of your API",
-        contact=openapi.Contact(email="contact@yourapi.com"),
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),  # Allows public access to the docs
+   openapi.Info(
+      title="My API",
+      default_version='v1',
+      description="API documentation for the Task Management system",
+      contact=openapi.Contact(email="contact@myapi.local"),
+      license=openapi.License(name="MIT License"),
+   ),
+   public=True,  # Set to True to make the schema available to everyone
+   permission_classes=(permissions.AllowAny,),  # Allow all users to view the Swagger UI
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/',include('authentication.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc-ui'),  # Optional Redoc UI
+    path('task/', include('taskmanagementapi.urls')),
+
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
 ]

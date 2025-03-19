@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     #created app
     'authentication',
+    'taskmanagementapi',
 ]
 
 
@@ -62,19 +63,19 @@ REST_FRAMEWORK = {
     ],
 }
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header',
-            'description': 'Token-based authentication with Knox. Example: "Token abc123..."',
-        }
-    },
-    'USE_SESSION_AUTH': True,  # Disable session authentication
-    # 'LOGIN_URL': 'rest_framework:login',  # Optional: if you want to use a login view
-    # 'LOGOUT_URL': 'rest_framework:logout',  # Optional: if you want to use a logout view
-}
+# SWAGGER_SETTINGS = {
+#     'SECURITY_DEFINITIONS': {
+#         'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header',
+#             'description': 'Token-based authentication with Knox. Example: "Token abc123..."',
+#         }
+#     },
+#     'USE_SESSION_AUTH': True,  # Disable session authentication
+#     # 'LOGIN_URL': 'rest_framework:login',  # Optional: if you want to use a login view
+#     # 'LOGOUT_URL': 'rest_framework:logout',  # Optional: if you want to use a logout view
+# }
 
 
 
@@ -182,6 +183,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# The directory where Django will collect static files for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
