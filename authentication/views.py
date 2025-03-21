@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from authentication.models import CustomUser
-from authentication.serializers import UserSerializer, RegisterSerializer, VerifyOTPSerializer, LoginSerializer
+from authentication.serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer
 
 
 class RegisterView(GenericAPIView):
