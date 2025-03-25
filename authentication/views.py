@@ -8,7 +8,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from authentication.models import CustomUser
-from authentication.serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer
+from authentication.serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer, \
+    ResetPasswordSerializer, VerifyResetPasswordSerializer
 
 
 class RegisterView(GenericAPIView):
@@ -83,3 +84,24 @@ class VerifyEmailView(GenericAPIView):
 
         except CustomUser.DoesNotExist:
             return Response({"error": "Invalid code or email"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestPasswordResetView(GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({"message": "Password reset OTP sent to email."}, status=status.HTTP_200_OK)
+
+class VerifyResetPasswordVIew(GenericAPIView):
+    serializer_class = VerifyResetPasswordSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+

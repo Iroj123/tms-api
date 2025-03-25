@@ -1,50 +1,13 @@
-# authentication/serializers.py
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
+from django_extensions.management.jobs import noneimplementation
 from rest_framework import serializers
 
 from TaskManagementSystem import settings
 from authentication.models import CustomUser
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField()
-#     repeat_password = serializers.CharField()
-#
-#     class Meta:
-#         model = CustomUser
-#         fields = ['email', 'first_name', 'last_name', 'password', 'repeat_password']
-#         extra_kwargs = {
-#             'password': {'required': True},
-#             'repeat_password': {'required': True},
-#         }
-#
-#     def validate(self, data):
-#         """
-#         Check that the password and repeat_password match.
-#         """
-#         password = data.get('password')
-#         repeat_password = data.get('repeat_password')
-#
-#         if password != repeat_password:
-#             raise serializers.ValidationError({"repeat_password": "Passwords must match."})
-#
-#         return data
-#
-#     def create(self, validated_data):
-#         """
-#         Create and return a new user with encrypted password.
-#         """
-#         validated_data.pop('repeat_password', None)  # Remove repeat_password from validated data
-#         user = CustomUser.objects.create_user(
-#             email=validated_data['email'],
-#             first_name=validated_data['first_name'],
-#             last_name=validated_data['last_name'],
-#             password=validated_data['password']
-#         )
-#         return user
-#
-#
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -168,6 +131,59 @@ class VerifyOTPSerializer(serializers.Serializer):
         user.save()
 
         return data
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+
+            user=CustomUser.objects.get(email=value)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+
+        user.reset_password_otp = get_random_string(length=6, allowed_chars="0123456789")
+        user.save()
+
+        send_mail(
+            subject="Password Reset OTP",
+            message=f"Your password reset OTP is {user.reset_password_otp}",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        return value
+
+class VerifyResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+    new_password = serializers.CharField()
+
+    def validate(self, data):
+        email = data.get("email")
+        otp = data.get("otp")
+        new_password = data.get("new_password")
+        try:
+            user=CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+
+        print(f"User email: {user.email}")
+        print(f"Stored OTP: {user.reset_password_otp}")
+        print(f"Entered OTP: {otp}")
+
+        if user.reset_password_otp != otp:
+            raise serializers.ValidationError("Invalid OTP.")
+
+        user.set_password(new_password)
+        user.reset_password_otp = None
+        user.save()
+
+        return {"message": "Password reset successful."}
+
+
+
 
 
 

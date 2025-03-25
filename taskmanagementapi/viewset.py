@@ -1,3 +1,4 @@
+from rest_auth.app_settings import PasswordResetSerializer
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,6 +46,7 @@ class ProjectTasksView(APIView):
         tasks = Task.objects.filter(project_id=project_id)
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
+
 
 
 

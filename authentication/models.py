@@ -30,6 +30,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     is_verified = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6,blank=True,null=True)
+    reset_password_otp=models.CharField(max_length=6,blank=True,null=True)
 
     # Define the custom manager for the CustomUser model
     objects = CustomUserManager()
